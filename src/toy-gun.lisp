@@ -24,9 +24,7 @@
 
 (defun handler (client)
   (with-open-stream (stream (usocket:socket-stream client))
-                    (loop for input = (read-char stream nil nil)
-                          while input do
-                          (funcall *cartridge* stream input))))
+                    (funcall *cartridge* stream)))
 
 (defun start (&key (port 8080) (address "localhost"))
   (unless *cartridge*
@@ -37,5 +35,5 @@
         (loop (setq sock (accept server-sock))
               (bordeaux-threads:make-thread
                (lambda ()
-                 (handler  sock))))
+                 (handler sock))))
       (dispose server-sock))))
