@@ -1,4 +1,5 @@
 #|
+URL: https://github.com/mocchit/toy-gun
 Author: mocchit
 |#
 
@@ -14,6 +15,6 @@ Author: mocchit
   :depends-on (:usocket
                :bordeaux-threads)
   :components ((:module "src"
-                :components
+                        :components
                 ((:file "toy-gun"))))
   :description "abstract server")
