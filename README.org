@@ -1,0 +1,15 @@
+#+title: toy-gun
+toy-gun is abstract server.
+
+#+begin_src common-lisp
+(require 'toy-gun)
+
+(defun ink (client-stream input)
+  (format client-stream "~A" input)
+  (force-output client-stream))
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (setq toy-gun:*cartridge* #'ink)
+  (toy-gun:start :port 38080 :address "0.0.0.0"))
+#+begin_end
