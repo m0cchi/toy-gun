@@ -4,9 +4,12 @@ toy-gun is abstract server.
 #+begin_src common-lisp
 (require 'toy-gun)
 
-(defun echo-ink (client-stream input)
-  (format client-stream "~A" input)
-  (force-output client-stream))
+(defun echo-ink (stream)
+  (loop for input = (read-char stream nil nil)
+        while input do
+        (progn
+          (format stream "~A" input)
+          (force-output stream))))
 
 (defun main (&rest argv)
   (declare (ignorable argv))
