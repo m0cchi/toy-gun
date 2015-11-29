@@ -22,7 +22,7 @@
   (format *log* "dispose server~%")
   (usocket:socket-close server))
 
-(defun select (client)
+(defun handler (client)
   (with-open-stream (stream (usocket:socket-stream client))
                     (loop for input = (read-char stream nil nil)
                           while input do
@@ -37,5 +37,5 @@
         (loop (setq sock (accept server-sock))
               (bordeaux-threads:make-thread
                (lambda ()
-                 (select sock))))
+                 (handler  sock))))
       (dispose server-sock))))
