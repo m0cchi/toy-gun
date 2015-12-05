@@ -24,7 +24,8 @@
 
 (defun handler (client)
   (with-open-stream (stream (usocket:socket-stream client))
-                    (funcall *cartridge* stream)))
+                    (handler-case (funcall *cartridge* stream)
+                                  (error (c) (format t "~%dump error: ~a~%" c)))))
 
 (defun start (&key (port 8080) (address "localhost"))
   (unless *cartridge*
@@ -35,5 +36,5 @@
         (loop (setq sock (accept server-sock))
               (bordeaux-threads:make-thread
                (lambda ()
-                 (handler sock))))
-      (dispose server-sock))))
+                 (handler sock)))))
+    (dispose server-sock)))
