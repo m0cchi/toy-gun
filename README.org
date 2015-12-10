@@ -5,13 +5,42 @@ sample:
 https://github.com/mocchit/http-ink
 
 #+begin_src common-lisp
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+(ql:quickload :flexi-streams)
+
 (require 'toy-gun)
 
+(defvar +NEWLINE+ 10)
+
+(defun collect (temp buffer)
+  (if (eq temp +NEWLINE+)
+      (progn
+        (vector-push-extend temp buffer)
+        '())
+    (if (equal temp nil)
+        '()
+      (progn
+        (vector-push-extend temp buffer)
+        T))))
+
+(defun read-line-with-buffer (stream)
+  (let* ((buffer (make-array 1024 :fill-pointer 0)))
+    (setf (fill-pointer buffer) 0)
+    (loop for temp = (read-byte stream nil nil)
+          while (collect temp buffer))
+     buffer))
+
 (defun echo-ink (stream)
-  (loop for input = (read-char stream nil nil)
-        while input do
+  (loop for line = (read-line-with-buffer stream)
+        while (not (eq (length line) 0)) do
         (progn
-          (format stream "~A" input)
+          (format t "~a" (flexi-streams:octets-to-string line :external-format :utf-8))
+          (write-sequence line stream)
           (force-output stream))))
 
 (defun main (&rest argv)
