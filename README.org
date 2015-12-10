@@ -29,8 +29,7 @@ exec ros -Q -- $0 "$@"
         T))))
 
 (defun read-line-with-buffer (stream)
-  (let* ((buffer (make-array 1024 :fill-pointer 0)))
-    (setf (fill-pointer buffer) 0)
+  (let* ((buffer (make-array 512 :fill-pointer 0)))
     (loop for temp = (read-byte stream nil nil)
           while (collect temp buffer))
      buffer))
