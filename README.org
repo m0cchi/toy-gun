@@ -1,6 +1,9 @@
 #+title: toy-gun
 toy-gun is abstract server.
 
+sample:
+https://github.com/mocchit/http-ink
+
 #+begin_src common-lisp
 (require 'toy-gun)
 
