@@ -22,7 +22,8 @@ exec ros -Q -- $0 "$@"
       (progn
         (vector-push-extend temp buffer)
         '())
-    (if (equal temp nil)
+    (if (or (eq temp nil)
+            (eq temp 255))
         '()
       (progn
         (vector-push-extend temp buffer)
