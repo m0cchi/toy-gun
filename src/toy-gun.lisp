@@ -13,7 +13,7 @@
 (defparameter *cartridge* '())
 
 (defun make-server-socket (port address)
-  (usocket:socket-listen address port :reuseaddress t))
+  (usocket:socket-listen address port :reuseaddress t :element-type '(unsigned-byte 8)))
 
 (defun accept (server)
   (usocket:socket-accept server))
