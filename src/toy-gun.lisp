@@ -25,9 +25,10 @@
   (usocket:socket-close server))
 
 (defun handler (client)
-  (with-open-stream (stream (usocket:socket-stream client))
-                    (handler-case (funcall *cartridge* stream)
-                                  (error (c) (format t "~%dump error: ~a~%" c)))))
+  (handler-case
+   (with-open-stream (stream (usocket:socket-stream client))
+                     (funcall *cartridge* stream))
+   (error (c) (format t "~%dump error: ~a~%" c))))
 
 (defun start (server)
   (unless *cartridge*
