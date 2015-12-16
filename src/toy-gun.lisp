@@ -32,7 +32,7 @@
 
 (defun start (server)
   (unless *cartridge*
-    (error "(setq toy-gun:*cartrige* #'your-ink)"))
+    (error "(setq toy-gun:*cartrige* #'your-ink)~%"))
   (format *log* "start server~%")
   (let ((sock '()))
     (unwind-protect
