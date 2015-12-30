@@ -1,8 +1,7 @@
 (in-package :cl-user)
 (defpackage toy-gun
-  (:use :cl)
-  (:use :usocket)
-  (:use :bordeaux-threads)
+  (:use :cl
+        :iolib)
   (:export :start
            :dispose
            :*log*
@@ -15,29 +14,43 @@
 (defparameter *cartridge* '())
 
 (defun make-server (&key (port 8080) (address "localhost"))
-  (usocket:socket-listen address port :reuseaddress t :element-type '(unsigned-byte 8)))
-
-(defun accept (server)
-  (usocket:socket-accept server))
+  (let ((socket (iolib.sockets:make-socket :address-family :ipv4
+                                           :type :stream
+                                           :connect :passive
+                                           :local-host address
+                                           :local-port port
+                                           :reuse-address t)))
+    (iolib.sockets::listen-on socket)
+    socket))
 
 (defun dispose (server)
   (format *log* "dispose server~%")
-  (usocket:socket-close server))
+  (handler-case (close server)
+                (error (c) c)))
 
 (defun handler (client)
   (handler-case
-   (with-open-stream (stream (usocket:socket-stream client))
-                     (funcall *cartridge* stream))
-   (error (c) (format t "~%dump error: ~a~%" c))))
+   (funcall *cartridge* client)
+   (error (c) (format *log* "~%dump error: ~a~%" c))))
+
+(defun fd-handler (server event-base)
+  (let* ((socket (iolib.sockets:accept-connection server))
+         (fd (iolib.streams:fd-of socket)))
+    (iolib.multiplex:set-io-handler event-base fd
+                                    :read  (lambda (_fd _ev _e)
+                                             (declare (ignore _fd _ev _e))
+                                             (handler socket)))))
 
 (defun start (server)
   (unless *cartridge*
     (error "(setq toy-gun:*cartrige* #'your-ink)~%"))
   (format *log* "start server~%")
-  (let ((sock '()))
+  (let ((ev (make-instance 'iolib.multiplex:event-base)))
+    (iolib.multiplex::set-io-handler ev
+                                     (iolib.streams:fd-of server)
+                                     :read (lambda (fd event exception)
+                                             (declare (ignore fd event exception))
+                                             (fd-handler server ev)))
     (unwind-protect
-        (loop (setq sock (accept server))
-              (bordeaux-threads:make-thread
-               (lambda ()
-                 (handler sock)))))
-    (dispose server)))
+        (iolib.multiplex:event-dispatch ev)
+      (dispose server))))
