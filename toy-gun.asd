@@ -12,8 +12,7 @@ Author: mocchit
   :version "0.0.1"
   :author "mocchi"
   :license "BSD License"
-  :depends-on (:usocket
-               :bordeaux-threads)
+  :depends-on (:iolib)
   :components ((:module "src"
                         :components
                 ((:file "toy-gun"))))
