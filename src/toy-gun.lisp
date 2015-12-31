@@ -6,11 +6,13 @@
            :dispose
            :*log*
            :*cartridge*
+           :*debug-log*
            :make-server))
 
 (in-package :toy-gun)
 
 (defparameter *log* t)
+(defparameter *debug-log* nil)
 (defparameter *cartridge* '())
 
 (defun make-server (&key (port 8080) (address "localhost"))
@@ -24,14 +26,14 @@
     socket))
 
 (defun dispose (server)
-  (format *log* "dispose server~%")
+  (format *debug-log* "dispose server~%")
   (handler-case (close server)
                 (error (c) c)))
 
 (defun handler (client)
   (handler-case
    (funcall *cartridge* client)
-   (error (c) (format *log* "~%dump error: ~a~%" c))))
+   (error (c) (format *debug-log* "~%dump error: ~a~%" c))))
 
 (defun fd-handler (server event-base)
   (let* ((socket (iolib.sockets:accept-connection server))
