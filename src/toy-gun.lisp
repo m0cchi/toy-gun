@@ -4,14 +4,12 @@
         :iolib)
   (:export :start
            :dispose
-           :*log*
            :*cartridge*
            :*debug-log*
            :make-server))
 
 (in-package :toy-gun)
 
-(defparameter *log* t)
 (defparameter *debug-log* nil)
 (defparameter *cartridge* '())
 
@@ -36,17 +34,17 @@
    (error (c) (format *debug-log* "~%dump error: ~a~%" c))))
 
 (defun fd-handler (server event-base)
-  (let* ((socket (iolib.sockets:accept-connection server))
+  (let* ((socket (iolib.sockets:accept-connection server :wait t))
          (fd (iolib.streams:fd-of socket)))
     (iolib.multiplex:set-io-handler event-base fd
-                                    :read  (lambda (_fd _ev _e)
-                                             (declare (ignore _fd _ev _e))
-                                             (handler socket)))))
+                                    :read (lambda (_fd _ev _e)
+                                            (declare (ignore _fd _ev _e))
+                                            (handler socket)))))
 
 (defun start (server)
   (unless *cartridge*
     (error "(setq toy-gun:*cartrige* #'your-ink)~%"))
-  (format *log* "start server~%")
+  (format *debug-log* "start server~%")
   (let ((ev (make-instance 'iolib.multiplex:event-base)))
     (iolib.multiplex::set-io-handler ev
                                      (iolib.streams:fd-of server)
